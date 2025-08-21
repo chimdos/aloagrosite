@@ -52,13 +52,93 @@ include(HEADER_TEMPLATE);
         height: 65%;
         width: 65%;
     }
+
+    @media only screen and (min-width: 1600px) {
+        .mainomelhor {
+            font-family: InstrumentSansBold;
+            font-weight: bold;
+            font-size: 600%;
+            color: white;
+            line-height: 110%;
+        }
+    }
+
+    @media only screen and (max-width: 1500px) {
+        .mainomelhor {
+            font-family: InstrumentSansBold;
+            font-weight: bold;
+            font-size: 550%;
+            color: white;
+            line-height: 110%;
+        }
+    }
+
+    @media only screen and (max-width: 1280px) {
+        .mainomelhor {
+            font-family: InstrumentSansBold;
+            font-weight: bold;
+            font-size: 500%;
+            color: white;
+            line-height: 110%;
+        }
+    }
+
+    @media only screen and (max-width: 1070px) {
+        .mainomelhor {
+            font-family: InstrumentSansBold;
+            font-weight: bold;
+            font-size: 400%;
+            color: white;
+            line-height: 110%;
+        }
+    }
+
+    @media only screen and (max-width: 870px) {
+        .mainomelhor {
+            font-family: InstrumentSansBold;
+            font-weight: bold;
+            font-size: 320%;
+            color: white;
+            line-height: 110%;
+        }
+    }
+
+    @media only screen and (max-width: 760px) {
+        .mainomelhor {
+            font-family: InstrumentSansBold;
+            font-weight: bold;
+            font-size: 250%;
+            color: white;
+            line-height: 110%;
+        }
+    }
+
+    @media only screen and (max-width: 750px) {
+        .mainomelhor {
+            font-family: InstrumentSansBold;
+            font-weight: bold;
+            font-size: 220%;
+            color: white;
+            line-height: 110%;
+        }
+    }
+
+    @media only screen and (max-width: 500px) {
+        .mainomelhor {
+            font-family: InstrumentSansBold;
+            font-weight: bold;
+            font-size: 100%;
+            color: white;
+            line-height: 110%;
+        }
+    }
 </style>
 <div class="mainbanner rounded-bottom-5">
     <div class="row align-items-start">
         <div class="col ms-5 mt-5">
-            <img class="caoescolhedor" src="arquivos/imgs/caoescolhedor.png">
+            <img class="caoescolhedor pe-none" src="arquivos/imgs/caoescolhedor.png">
         </div>
-        <div class="col mainomelhor mt-5">
+        <div class="col mainomelhor ms-4 mt-5">
             TUDO DE<br>MELHOR<br>PARA<br><a class="mainopcoes bichinhos">BICHINHOS</a> <a
                 class="mainopcoes fazenda">FAZENDA</a> <a class="mainopcoes pesca">PESCA</a>
         </div>
