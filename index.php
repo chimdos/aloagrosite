@@ -13,7 +13,12 @@ include(HEADER_TEMPLATE);
 
     @font-face {
         font-family: InstrumentSansBold;
-        src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Bold.ttf)
+        src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Bold.ttf);
+    }
+    
+    @font-face {
+        font-family: InstrumentSans;
+        src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Regular.ttf);
     }
 
     @font-face {
@@ -298,8 +303,9 @@ include(HEADER_TEMPLATE);
         top: 50%;
         transform: translateY(-40%);
         /* Ajuste este valor (-30%, -50%) para o efeito desejado */
+        max-height: 120%;
+        max-width: 120%;
     }
-
 
     /* RESPONSIVO */
     @media (max-width: 768px) {
