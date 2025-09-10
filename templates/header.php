@@ -19,11 +19,10 @@ if (!defined("BASEURL"))
 
     <script src="https://kit.fontawesome.com/3ffc574f3c.js" crossorigin="anonymous"></script>
 
-    <link rel="icon" href="arquivos/imgs/aloagroicon.png" type="image/x-icon">
+    <link rel="icon" href="<?php echo BASEURL; ?>arquivos/imgs/aloagroicon.png" type="image/x-icon">
 </head>
 
 <style>
-    /* Sua classe de estilo continua a mesma */
     .navbardivo {
         background-color: #004AAD;
     }
@@ -31,20 +30,131 @@ if (!defined("BASEURL"))
     .navbardivo i {
         color: white;
     }
+
+    .navbardivo .btn:focus {
+        background-color: #005BC5;
+        box-shadow: none;
+    }
+
+    .menutitulo {
+        color: white;
+        font-family: InstrumentSansBold;
+        font-size: 140%;
+    }
+
+    .menubody {
+        color: white;
+        font-family: InstrumentSans;
+        background-color: #004AAD;
+        font-size: 120%;
+    }
+
+    .nav-link:hover {
+        background-color: #005BC5;
+    }
+
+    .botaologin {
+        color: #333;
+        font-family: InstrumentSansBold;
+        background-color: #f9f9f9;
+        border-radius: 12px !important;
+    }
+
+    .botaologin i {
+        color: #333;
+    }
+
+    .botaologin:hover {
+        background-color: #e0e0e0;
+    }
+
+    /* 1. Define que o menu começa transparente e escondido */
+    .offcanvas {
+        opacity: 0;
+        visibility: hidden;
+        /* Garante que não é clicável quando escondido */
+    }
+
+    /* 2. Define que o menu, ao ser exibido, fica totalmente visível */
+    .offcanvas.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* 3. Define a transição (a animação em si) */
+    /* Aqui adicionamos 'opacity' e 'visibility' à transição padrão do Bootstrap */
+    .offcanvas.showing,
+    .offcanvas.hiding {
+        transition: transform 0.3s ease-in-out,
+            opacity 0.3s ease-in-out,
+            visibility 0.3s ease-in-out;
+    }
 </style>
 
 <body>
     <nav class="navbar navbar-expand-lg navbardivo">
         <div class="container-fluid">
-            <i class="fa-solid fa-bars fa-2x"></i>
-            <a class="navbar-brand" href="#">
-                <img src="arquivos/imgs/aloagroicon.png" alt="alo agro divo" width="50" height="50"
-                    class="d-inline-block align-text-top">
+            <button class="btn shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
+                <i class="fa-solid fa-bars fa-2x"></i>
+            </button>
+
+            <a href="<?php echo BASEURL; ?>login.php" class="btn ms-auto me-3 botaologin">
+                ENTRAR <i class="fa-solid fa-right-to-bracket ms-1"></i>
             </a>
-            <!--<form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>-->
+
+            <a class="navbar-brand" href="<?php echo BASEURL; ?>">
+                <img src="<?php echo BASEURL; ?>arquivos/imgs/aloagroicon.png" alt="alo agro divo" width="50"
+                    height="50" class="d-inline-block align-text-top pe-none">
+            </a>
         </div>
     </nav>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="menuLateral" aria-labelledby="menuLateralLabel">
+        <div class="offcanvas-header navbardivo">
+            <h5 class="offcanvas-title menutitulo" id="menuLateralLabel"><img class="me-2 pe-none mb-1" width="20"
+                    height="20" src="<?php echo BASEURL; ?>arquivos/imgs/aloagro simple amarelo.png"></i>Alô Agro</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+                aria-label="Fechar"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column menubody">
+            <ul class="navbar-nav flex-grow-1 pe-3">
+                <li class="nav-item me-2 pe-1">
+                    <a class="nav-link active" aria-current="page" href="<?php echo BASEURL; ?>">
+                        <i class="fa fa-house me-2"></i>
+                        Início
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link" href="">
+                        <i class="fa fa-box-open me-2"></i>
+                        Catálogo
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link" href="">
+                        <i class="fa fa-dog me-2"></i>
+                        Pets
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link" href="">
+                        <i class="fa fa-fish-fins me-2"></i>
+                        Pesca
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link" href="">
+                        <i class="fa fa-cow me-2"></i>
+                        Fazenda
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link" href="">
+                        <i class="fa fa-seedling me-2"></i>
+                        Jardinagem
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
     <main>
