@@ -358,17 +358,17 @@ include(HEADER_TEMPLATE);
     <div class="row justify-content-center g-4">
         <div class="col-12 col-md-3 col-lg-3 col-sm-3">
             <button class="btn botaoanimal">
-                <img src="arquivos/imgs/cachorro.jpg" class="imagemanimal" alt="Cachorro">
+                <img src="arquivos/imgs/cachorro.jpg" class="imagemanimal pe-none" alt="Cachorro">
             </button>
         </div>
         <div class="col-12 col-md-3 col-lg-3 col-sm-3">
             <button class="btn botaoanimal">
-                <img src="arquivos/imgs/gatcho.jpg" class="imagemanimal" alt="Gato">
+                <img src="arquivos/imgs/gatcho.jpg" class="imagemanimal pe-none" alt="Gato">
             </button>
         </div>
         <div class="col-12 col-md-3 col-lg-3 col-sm-3">
             <button class="btn botaoanimal">
-                <img src="arquivos/imgs/peixe.jpg" class="imagemanimal" alt="Peixe">
+                <img src="arquivos/imgs/peixe.jpg" class="imagemanimal pe-none" alt="Peixe">
             </button>
         </div>
     </div>
@@ -415,7 +415,7 @@ include(HEADER_TEMPLATE);
                 <h2>OFERTA EM<br>DESTAQUE</h2>
             </div>
             <div class="col-md-6 bannerimagem">
-                <img src="arquivos/imgs/whiskas.png" alt="Promoção de sachês Whiskas Leve 12 Pague 10">
+                <img src="arquivos/imgs/whiskas.png" class="pe-none" alt="Promoção de sachês Whiskas Leve 12 Pague 10">
             </div>
         </div>
     </div>

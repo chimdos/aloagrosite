@@ -116,7 +116,7 @@
                     </ul>
                 </div>
                 <div class="col-12 col-md-3 mb-3">
-                    <img src="arquivos/imgs/mapa.png" class="imagemmapa img-fluid" alt="Mapa da localização">
+                    <img src="arquivos/imgs/mapa.png" class="imagemmapa img-fluid pe-none" alt="Mapa da localização">
                 </div>
             </div>
             <div class="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top">
