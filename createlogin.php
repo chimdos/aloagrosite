@@ -8,36 +8,62 @@ include(HEADER_TEMPLATE);
 ?>
 
 <style>
+    @font-face {
+        font-family: InstrumentSansBold;
+        src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Bold.ttf);
+    }
 
-  @font-face {
-      font-family: InstrumentSansBold;
-      src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Bold.ttf);
-  }
+    @font-face {
+        font-family: InstrumentSans;
+        src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Regular.ttf);
+    }
 
-  @font-face {
-      font-family: InstrumentSans;
-      src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Regular.ttf);
-  }
+    @font-face {
+        font-family: GulfsDisplay;
+        src: url(arquivos/fonts/gulfsdisplay/GulfsDisplay-SemiExpanded.ttf);
+    }
 
-  @font-face {
-      font-family: GulfsDisplay;
-      src: url(arquivos/fonts/gulfsdisplay/GulfsDisplay-SemiExpanded.ttf);
-  }
+    .main-content {
+        margin-top: 80px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
 
-  /* Garantir que o gradiente ocupe toda a tela */
-  body {
-      background: #001e45;
-      background: linear-gradient(0deg, rgba(0, 30, 69, 1) 0%, rgba(0, 74, 173, 1) 75%);
-      min-height: 100vh; /* Altura mínima 100% da tela */
-      margin: 0; /* Remover margens padrão do body */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-  }
+    .titulologin {
+        font-family: GulfsDisplay;
+        letter-spacing: 5px;
+        font-size: 300%;
+        font-weight: 100;
+    }
 
-  /* Navbar fixo no topo */
-      .navbar {
+    /* Garantir que o gradiente ocupe toda a tela */
+    body {
+        background: #001e45;
+        background: linear-gradient(0deg, rgba(0, 30, 69, 1) 0%, rgba(0, 74, 173, 1) 75%);
+        min-height: 100vh;
+        /* Altura mínima 100% da tela */
+        margin: 0;
+        /* Remover margens padrão do body */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    h2 {
+        font-family: InstrumentSansBold;
+        text-align: center;
+        margin-bottom: 15px;
+        color: white;
+        font-weight: 600;
+        font-size: 40px;
+    }
+
+    /* Navbar fixo no topo */
+    .navbar {
         position: fixed;
         top: 0;
         left: 0;
@@ -46,200 +72,209 @@ include(HEADER_TEMPLATE);
         background-color: #004AAD;
     }
 
+    .register-container {
+        font-family: InstrumentSans;
+        background: #fff;
+        padding: 30px 40px;
+        border-radius: 5px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 380px;
+        /* Largura do login-container */
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
 
-  /* Container para imagem e formulário lado a lado */
-  .container {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 1200px;
-      margin-top: 80px; /* Ajuste para o conteúdo começar abaixo do navbar */
-      padding: 20px;
-  }
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #444;
+        font-family: InstrumentSans;
+    }
 
-  .container img {
-      max-width: 60%; /* A imagem ocupa 60% da largura */
-      max-height: 500px;
-      object-fit: cover; /* Ajusta a imagem para cobrir sem deformar */
-  }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        width: 100%;
+        padding: 12px 14px;
+        margin-bottom: 20px;
+        border: 1.5px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
 
-  /* Estilos do título h2 */
-  h2 {
-      position: absolute;
-      top: 20px; /* Deixa o título acima do conteúdo */
-      width: 100%;
-      text-align: center;
-      color: white;
-      font-size: 36px;
-      font-family: InstrumentSansBold;
-      margin: 0;
-      z-index: 999; /* Coloca o título acima de tudo */
-  }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type->"password"]:focus {
+        border-color: #4caf50;
+        outline: none;
+    }
 
-  .register-container {
-      background: #fff;
-      padding: 30px 50px; /* Menor altura do padding */
-      border-radius: 20px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 500px; /* A largura do formulário foi aumentada para 500px */
-      margin: 0 auto;
-      box-sizing: border-box;
-  }
+    .error {
+        color: red;
+        margin-bottom: 12px;
+        font-size: 14px;
+    }
 
-  label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: #555;
-      font-family: InstrumentSans;
-  }
+    .success {
+        color: green;
+        text-align: center;
+        margin-top: 15px;
+        font-weight: bold;
+    }
 
-  input[type="text"],
-  input[type="email"],
-  input[type="password"] {
-      width: 100%;
-      padding: 12px; /* Manter o padding maior para campos de entrada */
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 16px;
-  }
+    /* Para telas pequenas */
+    @media (max-width: 768px) {
+        .container {
+            flex-direction: column;
+            align-items: center;
+        }
 
-  input[type="text"]:focus,
-  input[type="email"]:focus,
-  input[type="password"]:focus {
-      border-color: #007bff;
-      outline: none;
-  }
+        .container img {
+            max-width: 80%;
+            /* Reduzir o tamanho da imagem em telas menores */
+            margin-bottom: 20px;
+        }
 
-  .abutton {
-      width: 100%;
-      padding: 14px;
-      background-color: #007bff;
-      border: none;
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-  }
+        .register-container {
+            padding: 20px 30px;
+            width: 90%;
+            /* Formulário ocupa 90% da largura em telas pequenas */
+        }
+    }
 
-  .abutton:hover {
-      background-color: #0056b3;
-  }
+    .labeldivo::placeholder {
+        font-size: 80%;
+        font-weight: bold;
+    }
 
-  .error {
-      color: red;
-      margin-bottom: 12px;
-      font-size: 14px;
-  }
+    .setinhalogin {
+        background-color: #e9e9e9;
+        border-color: white;
+        border-radius: 20px;
+    }
 
-  .success {
-      color: green;
-      text-align: center;
-      margin-top: 15px;
-      font-weight: bold;
-  }
+    .setinhalogin:hover {
+        border-color: #004AAD;
+        border-radius: 20px;
+    }
 
-  /* Para telas pequenas */
-  @media (max-width: 768px) {
-      .container {
-          flex-direction: column;
-          align-items: center;
-      }
+    .setinhalogin i {
+        color: gray;
+    }
 
-      .container img {
-          max-width: 80%; /* Reduzir o tamanho da imagem em telas menores */
-          margin-bottom: 20px;
-      }
+    .setinhalogin i:hover {
+        color: #004AADq '2';
+    }
 
-      .register-container {
-          padding: 20px 30px;
-          width: 90%; /* Formulário ocupa 90% da largura em telas pequenas */
-      }
-  }
+    .criarperfil {
+        text-decoration: none;
+        color: #333;
+        font-weight: 800;
+        font-size: 80%;
+    }
 
-  @media (max-width: 400px) {
-      .register-container {
-          padding: 25px 20px;
-          width: 90%;
-      }
-      h2 {
-          font-size: 24px;
-      }
-      button {
-          font-size: 16px;
-      }
-  }
+    .criarperfil:hover {
+        color: black;
+    }
 
+    .form-actions {
+        display: flex;
+        flex-direction: column;
+        /* Coloca os itens um abaixo do outro */
+        align-items: center;
+        /* Centraliza horizontalmente */
+        gap: 15px;
+        /* Cria um espaço entre o botão e o link (ajuste o valor como preferir) */
+        margin-top: 10px;
+        /* Adiciona um espaço acima do botão */
+    }
+
+    @media (max-width: 400px) {
+        .register-container {
+            padding: 25px 20px;
+            width: 90%;
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        button {
+            font-size: 16px;
+        }
+    }
 </style>
 
 <body>
-  <!-- Container com a imagem e o formulário -->
-  <div class="container">
-    <!-- Imagem do peixe à esquerda -->
-    <img class="peixelindo pe-none" src="arquivos/imgs/peixao.png" alt="Imagem do peixe">
+    <div class="main-content">
+        <h2 class="titulologin">CRIAR CONTA</h2>
 
-    <!-- Formulário à direita -->
-    <div class="register-container">
-      <form id="registerForm" novalidate>
+        <div class="register-container">
+            <form id="registerForm" novalidate>
 
-        <label for="email">E-mail</label>
-        <input type="email" id="email" name="email" required />
+                <label for="email"></label>
+                <input class="labeldivo" type="email" id="email" name="email" placeholder="EMAIL" required />
 
-        <label for="username">Usuário</label>
-        <input type="text" id="username" name="username" required />
+                <label for="username"></label>
+                <input class="labeldivo" type="text" id="username" name="username" placeholder="USUÁRIO" required />
 
-        <label for="password">Senha</label>
-        <input type="password" id="password" name="password" required minlength="6" />
+                <label for="password"></label>
+                <input class="labeldivo" type="password" id="password" name="password" placeholder="SENHA" required
+                    minlength="6" />
 
-        <div class="error" id="errorMessage"></div>
-
-        <button type="submit">Cadastrar</button>
-      </form>
-      <div class="success" id="successMessage"></div>
+                <div class="error" id="errorMessage"></div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn setinhalogin"><i class="fa-solid fa-arrow-right"></i></button>
+                    <a href="login.php" class="criarperfil">JÁ TENHO UMA CONTA</a>
+                </div>
+            </form>
+            <div class="success" id="successMessage"></div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const form = document.getElementById('registerForm');
-    const errorMessage = document.getElementById('errorMessage');
-    const successMessage = document.getElementById('successMessage');
+    <script>
+        // Seu script Javascript original (sem alterações)
+        const form = document.getElementById('registerForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
 
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
-      errorMessage.textContent = '';
-      successMessage.textContent = '';
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            errorMessage.textContent = '';
+            successMessage.textContent = '';
 
-      const email = form.email.value.trim();
-      const username = form.username.value.trim();
-      const password = form.password.value.trim();
+            const email = form.email.value.trim();
+            const username = form.username.value.trim();
+            const password = form.password.value.trim();
 
-      // Validação básica
-      if (!email || !username || !password) {
-        errorMessage.textContent = 'Por favor, preencha todos os campos.';
-        return;
-      }
+            // Validação básica
+            if (!email || !username || !password) {
+                errorMessage.textContent = 'Por favor, preencha todos os campos.';
+                return;
+            }
 
-      // Validação de email simples
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        errorMessage.textContent = 'Por favor, insira um e-mail válido.';
-        return;
-      }
+            // Validação de email simples
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorMessage.textContent = 'Por favor, insira um e-mail válido.';
+                return;
+            }
 
-      if (password.length < 6) {
-        errorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
-        return;
-      }
+            if (password.length < 6) {
+                errorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                return;
+            }
 
-      // Se passou em tudo
-      successMessage.textContent = 'Cadastro realizado com sucesso!';
-      form.reset();
-    });
-  </script>
+            // Se passou em tudo
+            successMessage.textContent = 'Cadastro realizado com sucesso!';
+            form.reset();
+        });
+    </script>
 </body>
+
 </html>

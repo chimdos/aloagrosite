@@ -41,16 +41,19 @@ include(HEADER_TEMPLATE);
     .bichinhos {
         font-family: GulfsDisplay;
         color: #FFD322;
+        font-weight: 100;
     }
 
     .fazenda {
         font-family: GulfsDisplay;
         color: #25CD63;
+        font-weight: 100;
     }
 
     .pesca {
         font-family: GulfsDisplay;
         color: #6EDFFF;
+        font-weight: 100;
     }
 
     .caoescolhedor {

@@ -105,35 +105,7 @@ include(HEADER_TEMPLATE);
         border-color: #4caf50;
         outline: none;
     }
-
-    .abutton {
-        width: 100%;
-        padding: 12px;
-        background-color: #4caf50;
-        border: none;
-        color: white;
-        font-size: 18px;
-        font-weight: 600;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        margin-bottom: 15px;
-        /* Espaçamento entre os botões */
-    }
-
-    .abutton:hover {
-        background-color: #43a047;
-        transform: translateY(-3px);
-        /* Efeito de elevação ao passar o mouse */
-    }
-
-    .btn-outline-success {
-        width: 100%;
-        background-color: white;
-        color: #25cd63;
-        border: 2px solid #25cd63;
-    }
-
+    
     .btn-outline-success:hover {
         background-color: #25cd63;
         color: white;
@@ -166,13 +138,31 @@ include(HEADER_TEMPLATE);
     .criarperfil {
         text-decoration: none;
         color: #333;
-        font-weight: bold;
+        font-weight: 800;
         font-size: 80%;
+    }
+
+    .criarperfil:hover {
+        color: black;
     }
 
     .titulologin {
         font-family: GulfsDisplay;
         letter-spacing: 5px;
+        font-size: 300%;
+        font-weight: 100;
+    }
+
+    .form-actions {
+        display: flex;
+        flex-direction: column;
+        /* Coloca os itens um abaixo do outro */
+        align-items: center;
+        /* Centraliza horizontalmente */
+        gap: 15px;
+        /* Cria um espaço entre o botão e o link (ajuste o valor como preferir) */
+        margin-top: 10px;
+        /* Adiciona um espaço acima do botão */
     }
 
     /* Para telas pequenas */
@@ -204,8 +194,12 @@ include(HEADER_TEMPLATE);
             <label for="senha"></label>
             <input class="labeldivo" type="password" id="senha" name="senha" placeholder="SENHA" required />
 
-            <button type="submit" class="btn setinhalogin"><i class="fa-solid fa-arrow-right"></i></button><br>
-            <a href="createlogin.php" class="criarperfil">CRIAR CONTA</a>
+            <div class="form-actions">
+                <button type="submit" class="btn setinhalogin"><i class="fa-solid fa-arrow-right"></i></button>
+                <a href="createlogin.php" class="criarperfil">CRIAR CONTA</a>
+            </div>
         </form>
     </div>
 </div>
+
+</html>
