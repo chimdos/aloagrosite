@@ -92,7 +92,7 @@ if (!defined("BASEURL"))
 </style>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbardivo">
+    <nav class="navbar navbar-expand-lg navbardivo d-flex">
         <div class="container-fluid">
             <button class="btn shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
                 <i class="fa-solid fa-bars fa-2x"></i>

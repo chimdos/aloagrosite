@@ -37,24 +37,20 @@ include(HEADER_TEMPLATE);
   }
 
   /* Navbar fixo no topo */
-  .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background-color: #004AAD;
-  }
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background-color: #004AAD;
+    }
 
-  .navbar i {
-      color: white;
-  }
 
   /* Container para imagem e formulário lado a lado */
   .container {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       width: 100%;
       max-width: 1200px;
       margin-top: 80px; /* Ajuste para o conteúdo começar abaixo do navbar */
@@ -118,7 +114,7 @@ include(HEADER_TEMPLATE);
       outline: none;
   }
 
-  button {
+  .abutton {
       width: 100%;
       padding: 14px;
       background-color: #007bff;
@@ -131,7 +127,7 @@ include(HEADER_TEMPLATE);
       transition: background-color 0.3s ease;
   }
 
-  button:hover {
+  .abutton:hover {
       background-color: #0056b3;
   }
 
