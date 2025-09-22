@@ -1,4 +1,5 @@
 <?php
+$page_title = "Alô Agro - Tudo de melhor para seu pet";
 // Carrega o arquivo de configuração principal
 require_once 'config.php';
 // Carrega a classe do banco de dados

@@ -1,23 +1,17 @@
 <?php
 
 /**
- * Configura o mysqli para lançar exceções em caso de erro,
- * tornando o tratamento de erros mais robusto e previsível.
- */
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-/**
- * Classe estática para gerenciar a interação com o banco de dados.
+ * Classe estática para gerenciar a interação com o banco de dados usando PDO.
  *
  * Centraliza a conexão, validação e execução de queries, seguindo
- * as melhores práticas de segurança e eficiência.
+ * as melhores práticas de segurança e eficiência com PDO.
  */
 class DB
 {
     /**
-     * @var mysqli|null A instância única da conexão com o banco de dados (Singleton).
+     * @var PDO|null A instância única da conexão com o banco de dados (Singleton).
      */
-    private static ?mysqli $conn = null;
+    private static ?PDO $conn = null;
 
     /**
      * Lista de tabelas e colunas permitidas para evitar SQL Injection.
@@ -31,13 +25,13 @@ class DB
     ];
 
     /**
-     * Abre e retorna uma conexão com o banco de dados.
+     * Abre e retorna uma conexão com o banco de dados via PDO.
      * Se uma conexão já existir, a retorna, evitando múltiplas conexões.
      *
-     * @return mysqli
+     * @return PDO
      * @throws DatabaseException Se as constantes de configuração não estiverem definidas ou a conexão falhar.
      */
-    private static function connect(): mysqli
+    private static function connect(): PDO
     {
         if (self::$conn === null) {
             // Verifica se as constantes de configuração do banco de dados foram definidas
@@ -46,9 +40,14 @@ class DB
             }
 
             try {
-                self::$conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-                self::$conn->set_charset("utf8mb4");
-            } catch (mysqli_sql_exception $e) {
+                $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+                $options = [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Configura o PDO para lançar exceções em caso de erro
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Define o modo de fetch padrão como associativo
+                    PDO::ATTR_EMULATE_PREPARES   => false,                  // Desativa a emulação de prepared statements para segurança
+                ];
+                self::$conn = new PDO($dsn, DB_USER, DB_PASSWORD, $options);
+            } catch (PDOException $e) {
                 // Lança uma exceção personalizada para falhas de conexão
                 throw new DatabaseException('Falha ao conectar ao banco de dados: ' . $e->getMessage());
             }
@@ -58,6 +57,7 @@ class DB
 
     /**
      * Valida se a tabela e as colunas fornecidas são permitidas.
+     * (Esta função permanece a mesma, pois é lógica de negócio e não de banco de dados)
      *
      * @param string $table O nome da tabela.
      * @param array $columns Um array de nomes de colunas a serem validados.
@@ -93,20 +93,15 @@ class DB
 
         $sql = "SELECT * FROM `$table`";
         if ($id !== null) {
-            $sql .= " WHERE `id` = ? LIMIT 1";
+            $sql .= " WHERE `id` = :id LIMIT 1";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param('i', $id);
+            $stmt->execute([':id' => $id]);
+            return $stmt->fetch() ?: []; // Retorna um array vazio se fetch retornar false
         } else {
             $stmt = $conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll();
         }
-
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($id !== null) {
-            return $result->fetch_assoc() ?? [];
-        }
-        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     /**
@@ -129,18 +124,14 @@ class DB
         $conn = self::connect();
 
         $colsString = '`' . implode('`, `', $columns) . '`';
-        $placeholders = implode(', ', array_fill(0, count($data), '?'));
-        $types = str_repeat('s', count($data));
-        $values = array_values($data);
+        $placeholders = ':' . implode(', :', $columns);
 
         $sql = "INSERT INTO `$table` ($colsString) VALUES ($placeholders)";
         
         $stmt = $conn->prepare($sql);
-        // Usa o operador splat (...) para passar os valores como argumentos individuais
-        $stmt->bind_param($types, ...$values);
-        $stmt->execute();
+        $stmt->execute($data); // PDO pode receber o array associativo diretamente
 
-        return $conn->insert_id;
+        return (int)$conn->lastInsertId();
     }
 
     /**
@@ -164,21 +155,19 @@ class DB
 
         $setClauses = [];
         foreach ($columns as $col) {
-            $setClauses[] = "`$col` = ?";
+            $setClauses[] = "`$col` = :$col";
         }
         $setString = implode(', ', $setClauses);
 
-        $types = str_repeat('s', count($data)) . 'i';
-        $values = array_values($data);
-        $values[] = $id; // Adiciona o ID ao final para o WHERE
+        // Adiciona o ID ao array de dados para o binding no WHERE
+        $data['id'] = $id;
 
-        $sql = "UPDATE `$table` SET $setString WHERE `id` = ?";
+        $sql = "UPDATE `$table` SET $setString WHERE `id` = :id";
         
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param($types, ...$values);
-        $stmt->execute();
+        $stmt->execute($data);
 
-        return $stmt->affected_rows > 0;
+        return $stmt->rowCount() > 0;
     }
 
     /**
@@ -193,24 +182,20 @@ class DB
         self::validate($table, ['id']);
         $conn = self::connect();
 
-        $sql = "DELETE FROM `$table` WHERE `id` = ?";
+        $sql = "DELETE FROM `$table` WHERE `id` = :id";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
+        $stmt->execute([':id' => $id]);
 
-        return $stmt->affected_rows > 0;
+        return $stmt->rowCount() > 0;
     }
     
     /**
      * Fecha a conexão com o banco de dados, se estiver aberta.
-     * Útil para ser chamado no final do script.
+     * Em PDO, isso é feito atribuindo null à instância da conexão.
      */
     public static function close(): void
     {
-        if (self::$conn !== null) {
-            self::$conn->close();
-            self::$conn = null;
-        }
+        self::$conn = null;
     }
 }
 
@@ -220,6 +205,3 @@ class DB
 class DatabaseException extends RuntimeException {}
 class TableNotAllowedException extends InvalidArgumentException {}
 class InvalidColumnException extends InvalidArgumentException {}
-
-?>
-
