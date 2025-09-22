@@ -22,7 +22,7 @@ function sendJsonResponse(array $data, int $statusCode = 200): void
 }
 
 // 1. Tratamento do Método da Requisição
-// Mantido como POST, conforme o original, mas GET também seria apropriado para uma busca.
+// Mantido como POST, mas GET também seria uma opção válida para busca.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendJsonResponse(
         ['success' => false, 'message' => 'Método não permitido. Use POST.'],
