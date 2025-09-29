@@ -1,12 +1,57 @@
 <?php
+// --- LÓGICA DE LOGIN (BACK-END) ---
+
 // Carrega o arquivo de configuração principal
 require_once 'config.php';
-// Carrega a classe do banco de dados
-require_once DBAPI; // DBAPI foi definido no config.php
+// Carrega o arquivo da classe do banco de dados (aloagrodb.php)
+require_once DBAPI;
+// Carrega o arquivo da classe de autenticação
+require_once 'auth.php';
+
+// Cria uma instância da classe Auth
+$auth = new Auth();
+
+// Se o usuário já estiver logado, redireciona para a página inicial para evitar que ele veja a tela de login novamente
+if ($auth->isLoggedIn()) {
+    header("Location: index.php");
+    exit();
+}
+
+// Variável para armazenar a mensagem de erro, se houver
+$error_message = null;
+
+// Verifica se o formulário foi enviado (se a requisição é do tipo POST)
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+    // Pega o email e a senha enviados pelo formulário
+    $email = $_POST['email'] ?? null;
+    $senha = $_POST['senha'] ?? null;
+
+    if ($email && $senha) {
+        // Tenta realizar o login usando o método da classe Auth
+        $result = $auth->login($email, $senha);
+
+        // Se o login for bem-sucedido...
+        if ($result['success']) {
+            // Redireciona o usuário para a página principal (ou dashboard)
+            header("Location: index.php");
+            exit(); // Encerra o script para garantir que o redirecionamento ocorra
+        } else {
+            // Se o login falhar, armazena a mensagem de erro
+            $error_message = $result['message'];
+        }
+    } else {
+        $error_message = "Por favor, preencha todos os campos.";
+    }
+}
+
 // Carrega o cabeçalho da página (com o menu e o Bootstrap)
 include(HEADER_TEMPLATE);
 ?>
+
+<!-- --- LAYOUT DA PÁGINA (FRONT-END) --- -->
 <style>
+    /* ... (todo o seu CSS permanece exatamente o mesmo) ... */
     @font-face {
         font-family: InstrumentSansBold;
         src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Bold.ttf);
@@ -22,21 +67,17 @@ include(HEADER_TEMPLATE);
         src: url(arquivos/fonts/gulfsdisplay/GulfsDisplay-SemiExpanded.ttf);
     }
 
-    /* Garantir que o gradiente ocupe toda a tela */
     body {
         background: #001e45;
         background: linear-gradient(0deg, rgba(0, 30, 69, 1) 0%, rgba(0, 74, 173, 1) 75%);
         min-height: 100vh;
-        /* Altura mínima 100% da tela */
         margin: 0;
-        /* Remover margens padrão do body */
         display: flex;
         justify-content: center;
         align-items: center;
         flex-direction: column;
     }
 
-    /* Navbar fixo no topo */
     .navbar {
         position: fixed;
         top: 0;
@@ -46,10 +87,8 @@ include(HEADER_TEMPLATE);
         background-color: #004AAD;
     }
 
-    /* Espaço para o conteúdo começar abaixo do navbar */
     .main-content {
         margin-top: 80px;
-        /* Ajuste para o conteúdo começar abaixo do navbar */
         width: 100%;
         display: flex;
         justify-content: center;
@@ -61,11 +100,9 @@ include(HEADER_TEMPLATE);
         font-family: InstrumentSansBold;
         text-align: center;
         margin-bottom: 15px;
-        /* Espaço maior entre o título e o formulário */
         color: white;
         font-weight: 600;
         font-size: 40px;
-        /* Reduzido para um aspecto mais clean */
     }
 
     .login-container {
@@ -73,12 +110,20 @@ include(HEADER_TEMPLATE);
         background: #fff;
         padding: 30px 40px;
         border-radius: 5px;
-        /* Bordas mais suaves */
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        /* Sombra mais suave e limpa */
         width: 100%;
         max-width: 380px;
-        /* Largura do formulário ajustada */
+    }
+    
+    /* Estilo para a mensagem de erro */
+    .alert-danger {
+        padding: 10px;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
     }
 
     label {
@@ -88,11 +133,10 @@ include(HEADER_TEMPLATE);
         color: #444;
     }
 
-    input[type="text"],
+    input[type="email"], /* MUDANÇA: alterado de text para email */
     input[type="password"] {
         width: 100%;
         padding: 12px 14px;
-        /* Aumentando o padding para inputs mais confortáveis */
         margin-bottom: 20px;
         border: 1.5px solid #ccc;
         border-radius: 6px;
@@ -100,7 +144,7 @@ include(HEADER_TEMPLATE);
         transition: border-color 0.3s ease;
     }
 
-    input[type="text"]:focus,
+    input[type="email"]:focus,
     input[type="password"]:focus {
         border-color: #4caf50;
         outline: none;
@@ -132,7 +176,7 @@ include(HEADER_TEMPLATE);
     }
 
     .setinhalogin i:hover {
-        color: #004AADq '2';
+        color: #004AAD; /* Corrigido valor inválido de cor */
     }
 
     .criarperfil {
@@ -156,16 +200,11 @@ include(HEADER_TEMPLATE);
     .form-actions {
         display: flex;
         flex-direction: column;
-        /* Coloca os itens um abaixo do outro */
         align-items: center;
-        /* Centraliza horizontalmente */
         gap: 15px;
-        /* Cria um espaço entre o botão e o link (ajuste o valor como preferir) */
         margin-top: 10px;
-        /* Adiciona um espaço acima do botão */
     }
 
-    /* Para telas pequenas */
     @media (max-width: 400px) {
         .login-container {
             padding: 25px 20px;
@@ -187,9 +226,20 @@ include(HEADER_TEMPLATE);
 <div class="main-content">
     <h2 class="titulologin">LOGIN</h2>
     <div class="login-container p-5">
-        <form>
-            <label for="nome"></label>
-            <input class="labeldivo" type="text" id="nome" name="nome" placeholder="NOME DE USUÁRIO" required />
+
+        <!-- Formulário agora aponta para ele mesmo e usa o método POST -->
+        <form method="POST" action="login.php">
+            
+            <!-- Bloco para exibir a mensagem de erro, se ela existir -->
+            <?php if ($error_message): ?>
+                <div class="alert-danger">
+                    <?php echo htmlspecialchars($error_message); ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- MUDANÇA: O campo agora é para 'email' e não mais 'nome' -->
+            <label for="email"></label>
+            <input class="labeldivo" type="email" id="email" name="email" placeholder="EMAIL" required />
 
             <label for="senha"></label>
             <input class="labeldivo" type="password" id="senha" name="senha" placeholder="SENHA" required />

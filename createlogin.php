@@ -8,6 +8,12 @@ include(HEADER_TEMPLATE);
 ?>
 
 <style>
+    /* ... (todo o seu CSS permanece exatamente o mesmo) ... */
+    /* Eu apenas corrigi um pequeno erro de digitação na cor do hover do ícone */
+    .setinhalogin i:hover {
+        color: #004AAD; /* Corrigido */
+    }
+    /* O restante do seu CSS aqui */
     @font-face {
         font-family: InstrumentSansBold;
         src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Bold.ttf);
@@ -39,14 +45,11 @@ include(HEADER_TEMPLATE);
         font-weight: 100;
     }
 
-    /* Garantir que o gradiente ocupe toda a tela */
     body {
         background: #001e45;
         background: linear-gradient(0deg, rgba(0, 30, 69, 1) 0%, rgba(0, 74, 173, 1) 75%);
         min-height: 100vh;
-        /* Altura mínima 100% da tela */
         margin: 0;
-        /* Remover margens padrão do body */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -62,7 +65,6 @@ include(HEADER_TEMPLATE);
         font-size: 40px;
     }
 
-    /* Navbar fixo no topo */
     .navbar {
         position: fixed;
         top: 0;
@@ -80,7 +82,6 @@ include(HEADER_TEMPLATE);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         width: 100%;
         max-width: 380px;
-        /* Largura do login-container */
         margin: 0 auto;
         box-sizing: border-box;
     }
@@ -108,7 +109,7 @@ include(HEADER_TEMPLATE);
 
     input[type="text"]:focus,
     input[type="email"]:focus,
-    input[type->"password"]:focus {
+    input[type="password"]:focus {
         border-color: #4caf50;
         outline: none;
     }
@@ -117,6 +118,7 @@ include(HEADER_TEMPLATE);
         color: red;
         margin-bottom: 12px;
         font-size: 14px;
+        min-height: 20px; /* Garante espaço para a mensagem */
     }
 
     .success {
@@ -126,7 +128,6 @@ include(HEADER_TEMPLATE);
         font-weight: bold;
     }
 
-    /* Para telas pequenas */
     @media (max-width: 768px) {
         .container {
             flex-direction: column;
@@ -135,14 +136,12 @@ include(HEADER_TEMPLATE);
 
         .container img {
             max-width: 80%;
-            /* Reduzir o tamanho da imagem em telas menores */
             margin-bottom: 20px;
         }
 
         .register-container {
             padding: 20px 30px;
             width: 90%;
-            /* Formulário ocupa 90% da largura em telas pequenas */
         }
     }
 
@@ -166,10 +165,6 @@ include(HEADER_TEMPLATE);
         color: gray;
     }
 
-    .setinhalogin i:hover {
-        color: #004AADq '2';
-    }
-
     .criarperfil {
         text-decoration: none;
         color: #333;
@@ -184,13 +179,9 @@ include(HEADER_TEMPLATE);
     .form-actions {
         display: flex;
         flex-direction: column;
-        /* Coloca os itens um abaixo do outro */
         align-items: center;
-        /* Centraliza horizontalmente */
         gap: 15px;
-        /* Cria um espaço entre o botão e o link (ajuste o valor como preferir) */
         margin-top: 10px;
-        /* Adiciona um espaço acima do botão */
     }
 
     @media (max-width: 400px) {
@@ -223,8 +214,7 @@ include(HEADER_TEMPLATE);
                 <input class="labeldivo" type="text" id="username" name="username" placeholder="USUÁRIO" required />
 
                 <label for="password"></label>
-                <input class="labeldivo" type="password" id="password" name="password" placeholder="SENHA" required
-                    minlength="6" />
+                <input class="labeldivo" type="password" id="password" name="password" placeholder="SENHA" required minlength="6" />
 
                 <div class="error" id="errorMessage"></div>
                 
@@ -238,13 +228,15 @@ include(HEADER_TEMPLATE);
     </div>
 
     <script>
-        // Seu script Javascript original (sem alterações)
         const form = document.getElementById('registerForm');
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
 
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
+        // Adicionamos 'async' para poder usar 'await' dentro da função
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault(); // Impede o recarregamento da página
+            
+            // Limpa mensagens antigas
             errorMessage.textContent = '';
             successMessage.textContent = '';
 
@@ -252,27 +244,50 @@ include(HEADER_TEMPLATE);
             const username = form.username.value.trim();
             const password = form.password.value.trim();
 
-            // Validação básica
+            // 1. Validação no lado do cliente (rápida, antes de enviar)
             if (!email || !username || !password) {
                 errorMessage.textContent = 'Por favor, preencha todos os campos.';
                 return;
             }
-
-            // Validação de email simples
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 errorMessage.textContent = 'Por favor, insira um e-mail válido.';
                 return;
             }
-
             if (password.length < 6) {
                 errorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
                 return;
             }
 
-            // Se passou em tudo
-            successMessage.textContent = 'Cadastro realizado com sucesso!';
-            form.reset();
+            // 2. Envia os dados para o servidor (backend)
+            try {
+                const response = await fetch('ajax/register_user.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, username, password }),
+                });
+
+                const result = await response.json(); // Pega a resposta do PHP
+
+                // 3. Exibe o resultado para o usuário
+                if (result.success) {
+                    successMessage.textContent = result.message + " Você será redirecionado para o login.";
+                    form.reset();
+                    // Redireciona para a página de login após 3 segundos
+                    setTimeout(() => {
+                        window.location.href = 'login.php';
+                    }, 3000);
+                } else {
+                    errorMessage.textContent = result.message; // Exibe o erro vindo do servidor (ex: "email já existe")
+                }
+
+            } catch (error) {
+                // Caso haja um erro de rede ou no servidor
+                errorMessage.textContent = 'Ocorreu um erro ao conectar com o servidor. Tente novamente.';
+                console.error('Erro no fetch:', error);
+            }
         });
     </script>
 </body>

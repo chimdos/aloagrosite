@@ -18,7 +18,8 @@ class DB
      * Adicione aqui todas as tabelas e colunas que sua aplicação utiliza.
      */
     private const ALLOWED_TABLES = [
-        'usuarios' => ['id', 'nome', 'email', 'senha', 'created_at', 'updated_at'],
+        // Adicionamos a coluna 'tipo' aqui para que a validação de segurança permita a busca.
+        'usuarios' => ['id', 'nome', 'email', 'senha', 'tipo', 'created_at', 'updated_at'], // <-- ALTERAÇÃO 1
         'produtos' => ['id', 'nome', 'preco', 'estoque', 'created_at', 'updated_at'],
         'favoritos' => ['id', 'usuario_id', 'produto_id', 'created_at'],
         'categorias' => ['id', 'nome', 'icone_bootstrap']
@@ -42,9 +43,9 @@ class DB
             try {
                 $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
                 $options = [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Configura o PDO para lançar exceções em caso de erro
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Define o modo de fetch padrão como associativo
-                    PDO::ATTR_EMULATE_PREPARES   => false,                  // Desativa a emulação de prepared statements para segurança
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Configura o PDO para lançar exceções em caso de erro
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,      // Define o modo de fetch padrão como associativo
+                    PDO::ATTR_EMULATE_PREPARES => false,                 // Desativa a emulação de prepared statements para segurança
                 ];
                 self::$conn = new PDO($dsn, DB_USER, DB_PASSWORD, $options);
             } catch (PDOException $e) {
@@ -120,18 +121,18 @@ class DB
 
         $columns = array_keys($data);
         self::validate($table, $columns);
-        
+
         $conn = self::connect();
 
         $colsString = '`' . implode('`, `', $columns) . '`';
         $placeholders = ':' . implode(', :', $columns);
 
         $sql = "INSERT INTO `$table` ($colsString) VALUES ($placeholders)";
-        
+
         $stmt = $conn->prepare($sql);
         $stmt->execute($data); // PDO pode receber o array associativo diretamente
 
-        return (int)$conn->lastInsertId();
+        return (int) $conn->lastInsertId();
     }
 
     /**
@@ -163,7 +164,7 @@ class DB
         $data['id'] = $id;
 
         $sql = "UPDATE `$table` SET $setString WHERE `id` = :id";
-        
+
         $stmt = $conn->prepare($sql);
         $stmt->execute($data);
 
@@ -188,7 +189,39 @@ class DB
 
         return $stmt->rowCount() > 0;
     }
+
+    /**
+     * Busca o primeiro registro que corresponde a um critério em uma coluna específica. // <-- ALTERAÇÃO 2
+     *
+     * @param string $table A tabela para buscar.
+     * @param string $column A coluna para comparar.
+     * @param mixed $value O valor a ser encontrado.
+     * @return array Retorna um array associativo do registro ou um array vazio se não encontrar.
+     */
+    public static function findBy(string $table, string $column, $value): array
+    {
+        self::validate($table, [$column]);
+        $conn = self::connect();
+
+        $sql = "SELECT * FROM `$table` WHERE `$column` = :value LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':value' => $value]);
+
+        return $stmt->fetch() ?: [];
+    }
     
+    public static function findAllBy(string $table, string $column, $value): array
+    {
+        self::validate($table, [$column]);
+        $conn = self::connect();
+
+        $sql = "SELECT * FROM `$table` WHERE `$column` = :value";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':value' => $value]);
+
+        return $stmt->fetchAll(); // A única diferença é fetchAll() em vez de fetch()
+    }
+
     /**
      * Fecha a conexão com o banco de dados, se estiver aberta.
      * Em PDO, isso é feito atribuindo null à instância da conexão.
@@ -202,6 +235,12 @@ class DB
 /**
  * Definição de exceções personalizadas para melhor tratamento de erros.
  */
-class DatabaseException extends RuntimeException {}
-class TableNotAllowedException extends InvalidArgumentException {}
-class InvalidColumnException extends InvalidArgumentException {}
+class DatabaseException extends RuntimeException
+{
+}
+class TableNotAllowedException extends InvalidArgumentException
+{
+}
+class InvalidColumnException extends InvalidArgumentException
+{
+}

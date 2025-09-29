@@ -2,6 +2,13 @@
 // Garante que a BASEURL foi definida no config.php
 if (!defined("BASEURL"))
     define("BASEURL", "/");
+
+// --- ADIÇÃO DA LÓGICA DE AUTENTICAÇÃO ---
+// Inclui a classe Auth (ajuste o caminho se necessário)
+require_once 'auth.php';
+// Cria um objeto Auth para usarmos seus métodos
+$auth = new Auth();
+// --- FIM DA ADIÇÃO ---
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -9,7 +16,7 @@ if (!defined("BASEURL"))
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($page_title) ? $page_title : 'Alô Agro';?></title>
+    <title><?php echo isset($page_title) ? $page_title : 'Alô Agro'; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -93,9 +100,30 @@ if (!defined("BASEURL"))
                 <i class="fa-solid fa-bars fa-2x"></i>
             </button>
 
-            <a href="<?php echo BASEURL; ?>login.php" class="btn ms-auto me-3 botaologin">
-                ENTRAR <i class="fa-solid fa-right-to-bracket ms-1"></i>
-            </a>
+            <div class="ms-auto me-3">
+                <?php if ($auth->isLoggedIn()): ?>
+                    <div class="dropdown">
+                        <button class="btn botaologin dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="fa-solid fa-user-circle me-2"></i>
+                            Olá, <?php echo htmlspecialchars($_SESSION['user_name']); // Mostra o nome do usuário ?>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                            <li><a class="dropdown-item" href="<?php echo BASEURL; ?>conta.php"><i
+                                        class="fa-solid fa-gear me-2"></i>Gerenciar Conta</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="<?php echo BASEURL; ?>logout.php"><i
+                                        class="fa-solid fa-right-from-bracket me-2"></i>Sair</a></li>
+                        </ul>
+                    </div>
+                <?php else: ?>
+                    <a href="<?php echo BASEURL; ?>login.php" class="btn botaologin">
+                        ENTRAR <i class="fa-solid fa-right-to-bracket ms-1"></i>
+                    </a>
+                <?php endif; ?>
+            </div>
 
             <a class="navbar-brand" href="<?php echo BASEURL; ?>">
                 <img src="<?php echo BASEURL; ?>arquivos/imgs/aloagroicon.png" alt="alo agro divo" width="50"
