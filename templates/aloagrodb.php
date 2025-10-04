@@ -20,7 +20,7 @@ class DB
     private const ALLOWED_TABLES = [
         // Adicionamos a coluna 'tipo' aqui para que a validação de segurança permita a busca.
         'usuarios' => ['id', 'nome', 'email', 'senha', 'tipo', 'created_at', 'updated_at'], // <-- ALTERAÇÃO 1
-        'produtos' => ['id', 'nome', 'preco', 'estoque', 'created_at', 'updated_at'],
+        'produtos' => ['id', 'nome', 'preco', 'imagem', 'estoque', 'categoria_id', 'created_at', 'updated_at'],
         'favoritos' => ['id', 'usuario_id', 'produto_id', 'created_at'],
         'categorias' => ['id', 'nome', 'icone_bootstrap']
     ];
@@ -209,7 +209,7 @@ class DB
 
         return $stmt->fetch() ?: [];
     }
-    
+
     public static function findAllBy(string $table, string $column, $value): array
     {
         self::validate($table, [$column]);

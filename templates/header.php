@@ -91,6 +91,34 @@ $auth = new Auth();
             opacity 0.3s ease-in-out,
             visibility 0.3s ease-in-out;
     }
+
+    .dropdown-item i {
+        color: #333;
+    }
+
+    .dropdown-item {
+        color: #333;
+        font-family: InstrumentSansBold;
+    }
+
+    .dropdown-menu {
+        border-radius: 10px;
+    }
+
+    @font-face {
+        font-family: InstrumentSansBold;
+        src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Bold.ttf);
+    }
+
+    @font-face {
+        font-family: InstrumentSans;
+        src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Regular.ttf);
+    }
+
+    @font-face {
+        font-family: GulfsDisplay;
+        src: url(arquivos/fonts/gulfsdisplay/GulfsDisplay-SemiExpanded.ttf);
+    }
 </style>
 
 <body>
@@ -108,19 +136,21 @@ $auth = new Auth();
                             <i class="fa-solid fa-user-circle me-2"></i>
                             Olá, <?php echo htmlspecialchars($_SESSION['user_name']); // Mostra o nome do usuário ?>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                            <li><a class="dropdown-item" href="<?php echo BASEURL; ?>conta.php"><i
-                                        class="fa-solid fa-gear me-2"></i>Gerenciar Conta</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
+                        <ul class="dropdown-menu dropdown-menu-end me-1" aria-labelledby="userMenu">
+                            <?php if ($auth->isAdmin()): ?>
+                                <li><a class="dropdown-item" href="<?php echo BASEURL; ?>adicionar_produto.php"><i
+                                            class="fa-solid fa-plus me-2"></i>Adicionar Produto</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                            <?php endif; ?>
                             <li><a class="dropdown-item" href="<?php echo BASEURL; ?>logout.php"><i
-                                        class="fa-solid fa-right-from-bracket me-2"></i>Sair</a></li>
+                                        class="fa-solid fa-right-from-bracket me-2"></i>SAIR</a></li>
                         </ul>
                     </div>
                 <?php else: ?>
                     <a href="<?php echo BASEURL; ?>login.php" class="btn botaologin">
-                        ENTRAR <i class="fa-solid fa-right-to-bracket ms-1"></i>
+                        FAZER LOGIN <i class="fa-solid fa-right-to-bracket ms-1"></i>
                     </a>
                 <?php endif; ?>
             </div>
@@ -148,7 +178,7 @@ $auth = new Auth();
                     </a>
                 </li>
                 <li class="nav-item me-2">
-                    <a class="nav-link" href="">
+                    <a class="nav-link" href="<?php echo BASEURL; ?>catalogo.php">
                         <i class="fa fa-box-open me-2"></i>
                         Catálogo
                     </a>
