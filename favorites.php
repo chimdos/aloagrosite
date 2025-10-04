@@ -1,164 +1,193 @@
 <?php
-declare(strict_types=1); // 1. Ativa a checagem de tipos estrita
+// Carrega os arquivos de configuração e classes
+require_once 'config.php';
+require_once DBAPI;
+require_once 'auth.php';
 
-// A inicialização da sessão deve ocorrer em um ponto de entrada único da aplicação.
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+$auth = new Auth();
+
+// --- ETAPA DE SEGURANÇA ---
+// Se o usuário não estiver logado, redireciona para a página de login.
+if (!$auth->isLoggedIn()) {
+    header("Location: login.php");
+    exit();
 }
 
-class Favorites
-{
-    /**
-     * @var PDO A instância da conexão com o banco de dados.
-     */
-    private PDO $pdo; // 2. Tipagem da propriedade
+// --- LÓGICA PARA BUSCAR OS DADOS ---
+$userId = $auth->getUserId();
 
-    /**
-     * O construtor recebe a conexão PDO via Injeção de Dependência.
-     *
-     * @param PDO $pdo A instância de conexão com o banco de dados.
-     */
-    public function __construct(PDO $pdo) // 3. Injeção de Dependência
-    {
-        $this->pdo = $pdo;
+// Query SQL com JOIN para buscar os DADOS DOS PRODUTOS a partir da tabela de favoritos
+$sql = "SELECT p.* FROM produtos p 
+        INNER JOIN favoritos f ON p.id = f.produto_id 
+        WHERE f.usuario_id = ?";
+
+// Executa a query usando nosso novo método DB::query()
+$favoriteProducts = DB::query($sql, [$userId]);
+
+// Define o título da página para o header
+$page_title = 'Meus Favoritos';
+
+// Carrega o cabeçalho da página
+include(HEADER_TEMPLATE);
+?>
+
+<style>
+    .product-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 6px 6px 20px #d9d9d9, -6px -6px 20px #ffffff;
+        border: none;
     }
 
-    /**
-     * Adiciona um produto aos favoritos de um usuário.
-     *
-     * @param int $userId O ID do usuário.
-     * @param int $productId O ID do produto.
-     * @return array Status da operação.
-     */
-    public function addToFavorites(int $userId, int $productId): array
-    {
-        // Reutiliza o método isFavorite para evitar duplicação de código
-        if ($this->isFavorite($userId, $productId)) {
-            return ['success' => false, 'message' => 'O produto já está nos favoritos.'];
-        }
-
-        try {
-            $sql = "INSERT INTO favoritos (usuario_id, produto_id) VALUES (:userId, :productId)";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':userId' => $userId, ':productId' => $productId]);
-
-            return ['success' => true, 'message' => 'Produto adicionado aos favoritos!'];
-        } catch (PDOException $e) {
-            // error_log('Erro ao adicionar favorito: ' . $e->getMessage());
-            return ['success' => false, 'message' => 'Ocorreu um erro no servidor.']; // 4. Mensagem de erro genérica
-        }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     }
 
-    /**
-     * Remove um produto dos favoritos de um usuário.
-     *
-     * @param int $userId O ID do usuário.
-     * @param int $productId O ID do produto.
-     * @return array Status da operação.
-     */
-    public function removeFromFavorites(int $userId, int $productId): array
-    {
-        try {
-            $sql = "DELETE FROM favoritos WHERE usuario_id = :userId AND produto_id = :productId";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':userId' => $userId, ':productId' => $productId]);
-
-            if ($stmt->rowCount() > 0) {
-                return ['success' => true, 'message' => 'Produto removido dos favoritos!'];
-            }
-            return ['success' => false, 'message' => 'Produto não encontrado nos favoritos.'];
-        } catch (PDOException $e) {
-            // error_log('Erro ao remover favorito: ' . $e->getMessage());
-            return ['success' => false, 'message' => 'Ocorreu um erro no servidor.'];
-        }
+    .card-title {
+        font-family: 'InstrumentSansBold', sans-serif;
+        color: #333;
     }
 
-    /**
-     * Retorna uma lista com todos os produtos favoritos de um usuário.
-     *
-     * @param int $userId O ID do usuário.
-     * @return array A lista de produtos favoritos.
-     */
-    public function getUserFavorites(int $userId): array
-    {
-        try {
-            // 5. Placeholders nomeados para clareza
-            $sql = "SELECT p.*, f.created_at as favorite_added_at, c.nome as categoria_nome
-                    FROM favoritos f
-                    JOIN produtos p ON f.produto_id = p.id
-                    LEFT JOIN categorias c ON p.categoria_id = c.id
-                    WHERE f.usuario_id = :userId
-                    ORDER BY f.created_at DESC";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':userId' => $userId]);
-            
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            // error_log('Erro ao buscar favoritos: ' . $e->getMessage());
-            return []; // Retorna array vazio em caso de erro
-        }
+    .card-text.price {
+        font-family: 'InstrumentSansBold', sans-serif;
+        font-size: 1.25rem;
+        color: #004AAD;
     }
 
-    /**
-     * Verifica se um produto específico está na lista de favoritos de um usuário.
-     *
-     * @param int $userId O ID do usuário.
-     * @param int $productId O ID do produto.
-     * @return bool True se for favorito, false caso contrário.
-     */
-    public function isFavorite(int $userId, int $productId): bool
-    {
-        try {
-            $sql = "SELECT 1 FROM favoritos WHERE usuario_id = :userId AND produto_id = :productId LIMIT 1";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':userId' => $userId, ':productId' => $productId]);
-            
-            // fetchColumn() é mais eficiente para checar existência do que rowCount()
-            return (bool) $stmt->fetchColumn();
-        } catch (PDOException $e) {
-            // error_log('Erro ao verificar favorito: ' . $e->getMessage());
-            return false;
-        }
+    .page-title {
+        font-family: 'InstrumentSansBold';
+        color: #333;
     }
 
-    /**
-     * Retorna a contagem total de favoritos de um usuário.
-     *
-     * @param int $userId O ID do usuário.
-     * @return int O número de favoritos.
-     */
-    public function getFavoritesCount(int $userId): int
-    {
-        try {
-            $sql = "SELECT COUNT(*) FROM favoritos WHERE usuario_id = :userId";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':userId' => $userId]);
-            
-            return (int) $stmt->fetchColumn();
-        } catch (PDOException $e) {
-            // error_log('Erro ao contar favoritos: ' . $e->getMessage());
-            return 0;
-        }
+    .botaodetalhes {
+        background-color: #004AAD;
+        color: white;
+        font-family: 'InstrumentSansBold';
     }
 
-    /**
-     * Limpa todos os favoritos de um usuário.
-     *
-     * @param int $userId O ID do usuário.
-     * @return array Status da operação.
-     */
-    public function clearFavorites(int $userId): array
-    {
-        try {
-            $sql = "DELETE FROM favoritos WHERE usuario_id = :userId";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':userId' => $userId]);
-            
-            return ['success' => true, 'message' => 'Todos os favoritos foram removidos.'];
-        } catch (PDOException $e) {
-            // error_log('Erro ao limpar favoritos: ' . $e->getMessage());
-            return ['success' => false, 'message' => 'Ocorreu um erro no servidor.'];
-        }
+    .empty-state {
+        text-align: center;
+        padding: 50px;
+        background-color: #f8f9fa;
+        border-radius: 20px;
     }
-}
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #004AAD;
+    }
+
+    .empty-state h3 {
+        font-family: 'InstrumentSansBold';
+    }
+
+    .empty-state p {
+        font-family: 'InstrumentSans';
+    }
+
+    .ircatalogo {
+        background-color: #004AAD;
+        font-family: 'InstrumentSansBold';
+        color: white;
+    }
+</style>
+
+<div class="container main-content my-5">
+
+    <h1 class="text-center mb-5 page-title">MEUS FAVORITOS</h1>
+
+    <?php if ($favoriteProducts): ?>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <?php foreach ($favoriteProducts as $produto): ?>
+                <div class="col">
+                    <div class="card h-100 product-card">
+                        <?php
+                        $imagePath = BASEURL . 'arquivos/uploads/produtos/' . htmlspecialchars($produto['imagem'] ?? '');
+                        $placeholder = "https://via.placeholder.com/500x500.png?text=Imagem+Indisponivel";
+                        $imageUrl = (!empty($produto['imagem']) && file_exists('arquivos/uploads/produtos/' . $produto['imagem'])) ? $imagePath : $placeholder;
+                        ?>
+                        <img src="<?php echo $imageUrl; ?>" class="card-img-top"
+                            alt="<?php echo htmlspecialchars($produto['nome']); ?>"
+                            style="aspect-ratio: 1 / 1; object-fit: cover;">
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title"><?php echo htmlspecialchars($produto['nome']); ?></h5>
+                            <p class="card-text price mt-2">
+                                R$ <?php echo number_format($produto['preco'], 2, ',', '.'); ?>
+                            </p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <a href="produto.php?id=<?php echo $produto['id']; ?>" class="btn botaodetalhes btn-sm">Ver
+                                    Detalhes</a>
+                                <?php if ($auth->isAdmin()): ?>
+                                    <div class="admin-actions">
+                                        <a href="editar_produto.php?id=<?php echo $produto['id']; ?>"
+                                            class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></a>
+                                        <a href="deletar_produto.php?id=<?php echo $produto['id']; ?>"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Tem certeza que deseja deletar este produto?');"><i
+                                                class="bi bi-trash"></i></a>
+                                    </div>
+                                <?php else: ?>
+                                    <button class="btn btn-outline-danger btn-favorite"
+                                        data-product-id="<?php echo $produto['id']; ?>">
+                                        <i class="bi bi-heart-fill"></i>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="empty-state">
+                    <i class="bi bi-emoji-frown"></i>
+                    <h3 class="mt-3">Sua lista de favoritos está vazia</h3>
+                    <p class="text-muted">Parece que você ainda não adicionou nenhum produto. Explore nosso catálogo e
+                        encontre algo que goste!</p>
+                    <a href="catalogo.php" class="btn ircatalogo mt-2">Ir para o Catálogo</a>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const favoriteButtons = document.querySelectorAll('.btn-favorite');
+        favoriteButtons.forEach(button => {
+            button.addEventListener('click', async function () {
+                const productId = this.dataset.productId;
+                const heartIcon = this.querySelector('i');
+                this.disabled = true;
+                try {
+                    const response = await fetch('ajax/toggle_favorito.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ produto_id: productId })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        // Ao clicar em um favorito nesta página, ele é sempre removido
+                        // Poderíamos fazer o card desaparecer, mas por enquanto só atualizamos o ícone
+                        heartIcon.classList.remove('bi-heart-fill');
+                        heartIcon.classList.add('bi-heart');
+                    }
+                } catch (error) {
+                    console.error("Erro ao favoritar:", error);
+                } finally {
+                    this.disabled = false;
+                }
+            });
+        });
+    });
+</script>
+
+<?php
+// Carrega o rodapé da página
+include(FOOTER_TEMPLATE);
 ?>

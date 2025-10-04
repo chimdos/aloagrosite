@@ -1,28 +1,33 @@
 <?php
 // ajax/toggle_favorito.php
 
+// Ativa a exibição de erros para depuração.
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+// Carrega os arquivos de configuração e classes
 require_once '../config.php';
 require_once DBAPI;
-require_once '../auth.php'; // NOVO: Inclui o arquivo com a classe Auth que criamos
+require_once '../auth.php';
 
-// Define o cabeçalho como JSON
+// Define o cabeçalho da resposta como JSON, essencial para o AJAX
 header('Content-Type: application/json');
 
-$auth = new Auth(); // NOVO: Cria um objeto da classe Auth para usarmos seus métodos
+$auth = new Auth();
 
-// ALTERADO: Agora usamos o método do objeto $auth
-if (!$auth->isLoggedIn()) { 
+// Valida se o usuário está logado
+if (!$auth->isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'not_logged_in']);
     exit;
 }
 
-// Verifica se é uma requisição POST
+// Valida o método da requisição
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'invalid_method']);
     exit;
 }
 
-// Lê os dados JSON da requisição
+// Pega os dados enviados pelo JavaScript
 $input = json_decode(file_get_contents('php://input'), true);
 $produto_id = $input['produto_id'] ?? null;
 
@@ -31,36 +36,22 @@ if (!$produto_id || !is_numeric($produto_id)) {
     exit;
 }
 
-// ALTERADO: Usamos o método getUserId() para pegar o ID diretamente
-$userId = $auth->getUserId(); 
-
-// Uma verificação extra para garantir que o ID foi recuperado da sessão
-if (!$userId) {
-    echo json_encode(['success' => false, 'message' => 'user_id_not_found']);
-    exit;
-}
+$userId = $auth->getUserId();
+$produto_id = (int)$produto_id;
 
 try {
-    // A variável $db provavelmente vem do seu arquivo DBAPI, então a mantemos
-    // Verifica se o produto existe
-    $query = "SELECT id FROM produtos WHERE id = ?";
-    $produto = $db->selectOne($query, [$produto_id]);
+    // Pega a conexão PDO usando o nosso método público seguro
+    $conn = DB::getConnection(); 
     
-    if (!$produto) {
-        echo json_encode(['success' => false, 'message' => 'product_not_found']);
-        exit;
-    }
+    // Prepara uma consulta para encontrar um favorito específico por DUAS colunas
+    $stmt = $conn->prepare("SELECT id FROM favoritos WHERE usuario_id = :user_id AND produto_id = :product_id");
+    $stmt->execute([':user_id' => $userId, ':product_id' => $produto_id]);
+    $favorito = $stmt->fetch();
     
-    // Verifica se já está nos favoritos
-    // ALTERADO: Usamos a variável $userId em vez de $user['id']
-    $query = "SELECT id FROM favoritos WHERE usuario_id = ? AND produto_id = ?";
-    $favorito = $db->selectOne($query, [$userId, $produto_id]);
-    
+    // Se o favorito foi encontrado, remove
     if ($favorito) {
-        // Remove dos favoritos
-        // ALTERADO: Usamos a variável $userId em vez de $user['id']
-        $query = "DELETE FROM favoritos WHERE usuario_id = ? AND produto_id = ?";
-        $db->execute($query, [$userId, $produto_id]);
+        // Usa o método padrão 'remove' da nossa classe DB
+        DB::remove('favoritos', (int)$favorito['id']);
         
         echo json_encode([
             'success' => true, 
@@ -68,10 +59,9 @@ try {
             'message' => 'removed_from_favorites'
         ]);
     } else {
-        // Adiciona aos favoritos
-        // ALTERADO: Usamos a variável $userId em vez de $user['id']
-        $query = "INSERT INTO favoritos (usuario_id, produto_id) VALUES (?, ?)";
-        $db->execute($query, [$userId, $produto_id]);
+        // Se não foi encontrado, adiciona
+        // Usa o método padrão 'save' da nossa classe DB
+        DB::save('favoritos', ['usuario_id' => $userId, 'produto_id' => $produto_id]);
         
         echo json_encode([
             'success' => true, 
@@ -81,8 +71,8 @@ try {
     }
     
 } catch (Exception $e) {
-    // É uma boa prática logar o erro real em um arquivo de log
-    // error_log($e->getMessage());
+    // Em caso de erro, registra em log e retorna uma mensagem genérica
+    error_log($e->getMessage()); 
     echo json_encode(['success' => false, 'message' => 'database_error']);
 }
 ?>

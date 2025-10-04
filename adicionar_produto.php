@@ -89,7 +89,7 @@ $error_message = null;
 
 // --- PROCESSAMENTO DO FORMULÁRIO ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['nome']) && !empty($_POST['preco']) && isset($_POST['estoque']) && !empty($_POST['categoria_id']) && isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
+    if (!empty($_POST['nome']) && !empty($_POST['preco']) && !empty($_POST['categoria_id']) && isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
 
         // Processa a imagem primeiro
         $imageResult = processAndSaveImage($_FILES['imagem'], 500, 500);
@@ -99,7 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'nome' => $_POST['nome'],
                 'preco' => $_POST['preco'],
                 'imagem' => $imageResult['filename'],
-                'estoque' => $_POST['estoque'],
                 'categoria_id' => $_POST['categoria_id']
             ];
 
@@ -200,10 +199,6 @@ include(HEADER_TEMPLATE);
                 <label for="preco" class="form-label">Preço (R$)</label>
                 <input type="number" step="0.01" class="form-control" id="preco" name="preco" placeholder="Ex: 19.99"
                     required>
-            </div>
-            <div class="mb-3">
-                <label for="estoque" class="form-label">Quantidade em Estoque</label>
-                <input type="number" class="form-control" id="estoque" name="estoque" required>
             </div>
             <div class="mb-3">
                 <label for="categoria_id" class="form-label">Categoria</label>

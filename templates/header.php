@@ -70,21 +70,16 @@ $auth = new Auth();
         background-color: #e0e0e0;
     }
 
-    /* 1. Define que o menu começa transparente e escondido */
     .offcanvas {
         opacity: 0;
         visibility: hidden;
-        /* Garante que não é clicável quando escondido */
     }
 
-    /* 2. Define que o menu, ao ser exibido, fica totalmente visível */
     .offcanvas.show {
         opacity: 1;
         visibility: visible;
     }
 
-    /* 3. Define a transição (a animação em si) */
-    /* Aqui adicionamos 'opacity' e 'visibility' à transição padrão do Bootstrap */
     .offcanvas.showing,
     .offcanvas.hiding {
         transition: transform 0.3s ease-in-out,
@@ -119,6 +114,23 @@ $auth = new Auth();
         font-family: GulfsDisplay;
         src: url(arquivos/fonts/gulfsdisplay/GulfsDisplay-SemiExpanded.ttf);
     }
+
+    .catalogoheader {
+        color: white;
+        text-decoration: none;
+        font-family: 'InstrumentSansBold';
+        font-size: 1.5rem;
+    }
+
+    /* --- ESTILO ADICIONAL PARA O ÍCONE DE FAVORITOS --- */
+    .favoritos i {
+        color: white;
+        transition: color 0.2s;
+    }
+    .favoritos:hover i {
+        color: #ffdd00; /* Efeito hover amarelo */
+    }
+    /* --- FIM DO ESTILO ADICIONAL --- */
 </style>
 
 <body>
@@ -128,36 +140,38 @@ $auth = new Auth();
                 <i class="fa-solid fa-bars fa-2x"></i>
             </button>
 
-            <div class="ms-auto me-3">
+            <a class="catalogoheader ms-2" href="<?php echo BASEURL; ?>catalogo.php">CATÁLOGO</a>
+
+            <div class="ms-auto me-3 d-flex align-items-center gap-3">
+
                 <?php if ($auth->isLoggedIn()): ?>
+                    <a class="favoritos" href="<?php echo BASEURL; ?>favorites.php" title="Meus Favoritos">
+                        <i class="fa-solid fa-heart fa-lg"></i>
+                    </a>
+
                     <div class="dropdown">
-                        <button class="btn botaologin dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                        <button class="btn botaologin dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fa-solid fa-user-circle me-2"></i>
-                            Olá, <?php echo htmlspecialchars($_SESSION['user_name']); // Mostra o nome do usuário ?>
+                            Olá, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end me-1" aria-labelledby="userMenu">
                             <?php if ($auth->isAdmin()): ?>
-                                <li><a class="dropdown-item" href="<?php echo BASEURL; ?>adicionar_produto.php"><i
-                                            class="fa-solid fa-plus me-2"></i>Adicionar Produto</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
+                                <li><a class="dropdown-item" href="<?php echo BASEURL; ?>adicionar_produto.php"><i class="fa-solid fa-plus me-2"></i>Adicionar Produto</a></li>
+                                <li><hr class="dropdown-divider"></li>
                             <?php endif; ?>
-                            <li><a class="dropdown-item" href="<?php echo BASEURL; ?>logout.php"><i
-                                        class="fa-solid fa-right-from-bracket me-2"></i>SAIR</a></li>
+                            <li><a class="dropdown-item" href="<?php echo BASEURL; ?>logout.php"><i class="fa-solid fa-right-from-bracket me-2"></i>SAIR</a></li>
                         </ul>
                     </div>
+                    
                 <?php else: ?>
                     <a href="<?php echo BASEURL; ?>login.php" class="btn botaologin">
                         FAZER LOGIN <i class="fa-solid fa-right-to-bracket ms-1"></i>
                     </a>
                 <?php endif; ?>
-            </div>
 
+            </div>
             <a class="navbar-brand" href="<?php echo BASEURL; ?>">
-                <img src="<?php echo BASEURL; ?>arquivos/imgs/aloagroicon.png" alt="alo agro divo" width="50"
-                    height="50" class="d-inline-block align-text-top pe-none">
+                <img src="<?php echo BASEURL; ?>arquivos/imgs/aloagroicon.png" alt="alo agro divo" width="50" height="50" class="d-inline-block align-text-top pe-none">
             </a>
         </div>
     </nav>

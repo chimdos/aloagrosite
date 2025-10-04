@@ -6,6 +6,25 @@ require_once 'auth.php'; // Incluímos para futuras interações (como o botão 
 
 $auth = new Auth();
 
+// No topo do catalogo.php
+
+$auth = new Auth();
+
+// --- NOVO BLOCO PARA BUSCAR FAVORITOS ---
+$userFavorites = [];
+if ($auth->isLoggedIn()) {
+    $userId = $auth->getUserId();
+    $favoritosDoUsuario = DB::findAllBy('favoritos', 'usuario_id', $userId);
+    // Cria um array simples contendo apenas os IDs dos produtos favoritados
+    foreach ($favoritosDoUsuario as $fav) {
+        $userFavorites[] = $fav['produto_id'];
+    }
+}
+// --- FIM DO NOVO BLOCO ---
+
+// 1. Busca todas as categorias no banco de dados
+$categorias = DB::find('categorias');
+
 // --- LÓGICA PARA BUSCAR OS DADOS ---
 // 1. Busca todas as categorias no banco de dados
 $categorias = DB::find('categorias');
@@ -20,6 +39,10 @@ include(HEADER_TEMPLATE);
 <style>
     .product-card {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 6px 6px 20px #d9d9d9,
+            -6px -6px 20px #ffffff;
         border: none;
     }
 
@@ -116,8 +139,14 @@ include(HEADER_TEMPLATE);
                                                 </a>
                                             </div>
                                         <?php else: ?>
-                                            <button class="btn btn-outline-danger">
-                                                <i class="bi bi-heart"></i>
+                                            <button class="btn btn-outline-danger btn-favorite"
+                                                data-product-id="<?php echo $produto['id']; ?>" <?php if (!$auth->isLoggedIn())
+                                                       echo 'disabled title="Faça login para favoritar"'; ?>>
+                                                <?php
+                                                // Verifica se o ID do produto atual está no array de favoritos do usuário
+                                                $isFavorited = in_array($produto['id'], $userFavorites);
+                                                ?>
+                                                <i class="bi <?php echo $isFavorited ? 'bi-heart-fill' : 'bi-heart'; ?>"></i>
                                             </button>
                                         <?php endif; ?>
                                     </div>
@@ -138,6 +167,62 @@ include(HEADER_TEMPLATE);
     <?php endif; ?>
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Seleciona TODOS os botões de favoritar da página
+        const favoriteButtons = document.querySelectorAll('.btn-favorite');
+
+        // Adiciona um evento de clique para CADA botão
+        favoriteButtons.forEach(button => {
+            button.addEventListener('click', async function () {
+                // Pega o ID do produto guardado no botão que foi clicado
+                const productId = this.dataset.productId;
+                const heartIcon = this.querySelector('i');
+
+                // Desabilita o botão para evitar cliques múltiplos
+                this.disabled = true;
+
+                try {
+                    // Envia a requisição AJAX para o backend
+                    const response = await fetch('ajax/toggle_favorito.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ produto_id: productId })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Se a operação foi um sucesso, alterna a classe do ícone
+                        if (result.favorited) {
+                            heartIcon.classList.remove('bi-heart');
+                            heartIcon.classList.add('bi-heart-fill');
+                        } else {
+                            heartIcon.classList.remove('bi-heart-fill');
+                            heartIcon.classList.add('bi-heart');
+                        }
+                    } else {
+                        // Se o usuário não estiver logado, o backend retorna um erro.
+                        // Podemos redirecioná-lo para a página de login.
+                        if (result.message === 'not_logged_in') {
+                            window.location.href = 'login.php';
+                        }
+                    }
+
+                } catch (error) {
+                    console.error("Erro ao favoritar:", error);
+                } finally {
+                    // Habilita o botão novamente, independente do resultado
+                    this.disabled = false;
+                }
+            });
+        });
+    });
+</script>
+
 
 <?php
 // Carrega o rodapé da página

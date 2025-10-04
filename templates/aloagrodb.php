@@ -56,6 +56,18 @@ class DB
         return self::$conn;
     }
 
+    // Em aloagrodb.php, DENTRO da class DB
+
+    /**
+     * Retorna a instância da conexão PDO.
+     * É um método público para acessar a conexão gerenciada pela classe.
+     * @return PDO
+     */
+    public static function getConnection(): PDO
+    {
+        return self::connect();
+    }
+
     /**
      * Valida se a tabela e as colunas fornecidas são permitidas.
      * (Esta função permanece a mesma, pois é lógica de negócio e não de banco de dados)
@@ -65,6 +77,24 @@ class DB
      * @throws TableNotAllowedException Se a tabela não for permitida.
      * @throws InvalidColumnException Se alguma das colunas não for permitida na tabela.
      */
+
+    // Adicione este método em aloagrodb.php, dentro da class DB
+
+    /**
+     * Executa uma query SQL genérica e retorna todos os resultados.
+     * ATENÇÃO: Use apenas com queries seguras e prepared statements.
+     *
+     * @param string $sql A string da query SQL com placeholders (ex: ? ou :nome).
+     * @param array $params Um array com os valores para os placeholders.
+     * @return array Retorna um array com os resultados.
+     */
+    public static function query(string $sql, array $params = []): array
+    {
+        $conn = self::connect();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
     private static function validate(string $table, array $columns = []): void
     {
         if (!array_key_exists($table, self::ALLOWED_TABLES)) {
