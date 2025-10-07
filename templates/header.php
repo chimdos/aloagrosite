@@ -3,12 +3,17 @@
 if (!defined("BASEURL"))
     define("BASEURL", "/");
 
-// --- ADIÇÃO DA LÓGICA DE AUTENTICAÇÃO ---
-// Inclui a classe Auth (ajuste o caminho se necessário)
-require_once 'auth.php';
-// Cria um objeto Auth para usarmos seus métodos
+// --- LÓGICA DE AUTENTICAÇÃO E DADOS ---
+// CORREÇÃO: Usando '../' para subir um nível e encontrar os arquivos na raiz do projeto.
+require_once __DIR__ . '/../config.php';
+require_once DBAPI;
+require_once __DIR__ . '/../auth.php';
+
 $auth = new Auth();
-// --- FIM DA ADIÇÃO ---
+
+// --- Busca as categorias para o menu lateral ---
+// Esta linha agora funcionará, pois o DBAPI foi carregado corretamente.
+$sidebar_categorias = DB::find('categorias');
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -122,19 +127,30 @@ $auth = new Auth();
         font-size: 1.5rem;
     }
 
-    /* --- ESTILO ADICIONAL PARA O ÍCONE DE FAVORITOS --- */
     .favoritos i {
         color: white;
         transition: color 0.2s;
     }
+
     .favoritos:hover i {
-        color: #ffdd00; /* Efeito hover amarelo */
+        color: #ffdd00;
     }
-    /* --- FIM DO ESTILO ADICIONAL --- */
+
+    /* Estilo para o grupo da barra de pesquisa arredondada */
+    .input-group.search-rounded {
+        border-radius: 20px;
+        overflow: hidden;
+        font-family: 'InstrumentSans';
+    }
+
+    /* Garante que o input não tenha foco com sombra que vaze para fora */
+    .input-group.search-rounded .form-control:focus {
+        box-shadow: none;
+    }
 </style>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbardivo d-flex">
+    <nav class="navbar navbar-expand-lg navbardivo">
         <div class="container-fluid">
             <button class="btn shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
                 <i class="fa-solid fa-bars fa-2x"></i>
@@ -142,36 +158,51 @@ $auth = new Auth();
 
             <a class="catalogoheader ms-2" href="<?php echo BASEURL; ?>catalogo.php">CATÁLOGO</a>
 
-            <div class="ms-auto me-3 d-flex align-items-center gap-3">
+            <div class="mx-auto me-2" style="width: 50%;">
+                <form role="search" action="<?php echo BASEURL; ?>catalogo.php" method="GET">
+                    <div class="input-group search-rounded">
+                        <input type="search" class="form-control" name="busca" placeholder="Buscar produtos..."
+                            aria-label="Buscar produtos">
+                        <button class="btn btn-light" type="submit" id="button-search">
+                            <i class="fa-solid fa-magnifying-glass" style="color: #333;"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
 
+            <div class="ms-auto me-3 d-flex align-items-center gap-3">
                 <?php if ($auth->isLoggedIn()): ?>
                     <a class="favoritos" href="<?php echo BASEURL; ?>favorites.php" title="Meus Favoritos">
                         <i class="fa-solid fa-heart fa-lg"></i>
                     </a>
-
                     <div class="dropdown">
-                        <button class="btn botaologin dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn botaologin dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown"
+                            aria-expanded="false">
                             <i class="fa-solid fa-user-circle me-2"></i>
                             Olá, <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end me-1" aria-labelledby="userMenu">
                             <?php if ($auth->isAdmin()): ?>
-                                <li><a class="dropdown-item" href="<?php echo BASEURL; ?>adicionar_produto.php"><i class="fa-solid fa-plus me-2"></i>Adicionar Produto</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="<?php echo BASEURL; ?>adicionar_produto.php"><i
+                                            class="fa-solid fa-plus me-2"></i>Adicionar Produto</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                             <?php endif; ?>
-                            <li><a class="dropdown-item" href="<?php echo BASEURL; ?>logout.php"><i class="fa-solid fa-right-from-bracket me-2"></i>SAIR</a></li>
+                            <li><a class="dropdown-item" href="<?php echo BASEURL; ?>logout.php"><i
+                                        class="fa-solid fa-right-from-bracket me-2"></i>SAIR</a></li>
                         </ul>
                     </div>
-                    
                 <?php else: ?>
                     <a href="<?php echo BASEURL; ?>login.php" class="btn botaologin">
                         FAZER LOGIN <i class="fa-solid fa-right-to-bracket ms-1"></i>
                     </a>
                 <?php endif; ?>
-
             </div>
+
             <a class="navbar-brand" href="<?php echo BASEURL; ?>">
-                <img src="<?php echo BASEURL; ?>arquivos/imgs/aloagroicon.png" alt="alo agro divo" width="50" height="50" class="d-inline-block align-text-top pe-none">
+                <img src="<?php echo BASEURL; ?>arquivos/imgs/aloagroicon.png" alt="alo agro divo" width="50"
+                    height="50" class="d-inline-block align-text-top pe-none">
             </a>
         </div>
     </nav>
@@ -179,7 +210,7 @@ $auth = new Auth();
     <div class="offcanvas offcanvas-start" tabindex="-1" id="menuLateral" aria-labelledby="menuLateralLabel">
         <div class="offcanvas-header navbardivo">
             <h5 class="offcanvas-title menutitulo" id="menuLateralLabel"><img class="me-2 pe-none mb-1" width="20"
-                    height="20" src="<?php echo BASEURL; ?>arquivos/imgs/aloagro simple amarelo.png"></i>Alô Agro</h5>
+                    height="20" src="<?php echo BASEURL; ?>arquivos/imgs/aloagro simple amarelo.png">Alô Agro</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
                 aria-label="Fechar"></button>
         </div>
@@ -197,30 +228,23 @@ $auth = new Auth();
                         Catálogo
                     </a>
                 </li>
-                <li class="nav-item me-2">
-                    <a class="nav-link" href="">
-                        <i class="fa fa-dog me-2"></i>
-                        Pets
-                    </a>
+
+                <li>
+                    <hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.25);">
                 </li>
-                <li class="nav-item me-2">
-                    <a class="nav-link" href="">
-                        <i class="fa fa-fish-fins me-2"></i>
-                        Pesca
-                    </a>
-                </li>
-                <li class="nav-item me-2">
-                    <a class="nav-link" href="">
-                        <i class="fa fa-cow me-2"></i>
-                        Fazenda
-                    </a>
-                </li>
-                <li class="nav-item me-2">
-                    <a class="nav-link" href="">
-                        <i class="fa fa-seedling me-2"></i>
-                        Jardinagem
-                    </a>
-                </li>
+
+                <?php if ($sidebar_categorias): ?>
+                    <?php foreach ($sidebar_categorias as $categoria): ?>
+                        <li class="nav-item me-2">
+                            <a class="nav-link"
+                                href="<?php echo BASEURL; ?>catalogo.php#<?php echo htmlspecialchars($categoria['nome']); ?>">
+                                <i class="<?php echo htmlspecialchars($categoria['icone_bootstrap']); ?> me-2"></i>
+                                <?php echo htmlspecialchars($categoria['nome']); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
             </ul>
         </div>
     </div>

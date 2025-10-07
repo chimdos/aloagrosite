@@ -4,6 +4,11 @@ $page_title = "Alô Agro - Tudo de melhor para seu pet";
 require_once 'config.php';
 // Carrega a classe do banco de dados
 require_once DBAPI; // DBAPI foi definido no config.php
+require 'auth.php';
+
+// --- NOVO: Busca as categorias para usar nos links da página ---
+$categorias_index = DB::find('categorias');
+
 // Carrega o cabeçalho da página (com o menu e o Bootstrap)
 include(HEADER_TEMPLATE);
 ?>
@@ -16,7 +21,7 @@ include(HEADER_TEMPLATE);
         font-family: InstrumentSansBold;
         src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Bold.ttf);
     }
-    
+
     @font-face {
         font-family: InstrumentSans;
         src: url(arquivos/fonts/instrumentsans/static/InstrumentSans-Regular.ttf);
@@ -36,7 +41,8 @@ include(HEADER_TEMPLATE);
     }
 
     .mainopcoes {
-        font-size: 35%;
+        font-size: 50%;
+        margin-right: 0.5rem;
     }
 
     .bichinhos {
@@ -86,7 +92,7 @@ include(HEADER_TEMPLATE);
         .mainomelhor {
             font-family: InstrumentSansBold;
             font-weight: bold;
-            font-size: 850%;
+            font-size: 600%;
             color: white;
             line-height: 110%;
         }
@@ -96,7 +102,7 @@ include(HEADER_TEMPLATE);
         .mainomelhor {
             font-family: InstrumentSansBold;
             font-weight: bold;
-            font-size: 750%;
+            font-size: 600%;
             color: white;
             line-height: 110%;
         }
@@ -106,7 +112,7 @@ include(HEADER_TEMPLATE);
         .mainomelhor {
             font-family: InstrumentSansBold;
             font-weight: bold;
-            font-size: 700%;
+            font-size: 600%;
             color: white;
             line-height: 110%;
         }
@@ -116,7 +122,7 @@ include(HEADER_TEMPLATE);
         .mainomelhor {
             font-family: InstrumentSansBold;
             font-weight: bold;
-            font-size: 650%;
+            font-size: 600%;
             color: white;
             line-height: 110%;
         }
@@ -343,15 +349,40 @@ include(HEADER_TEMPLATE);
     }
 </style>
 
-<!-- Main Opções Azul -->
 <div class="mainbanner rounded-bottom-5">
     <div class="row align-items-start">
         <div class="col ms-5 mt-5">
             <img class="caoescolhedor pe-none" src="arquivos/imgs/caoescolhedor.png">
         </div>
         <div class="col mainomelhor ms-4 mt-5">
-            TUDO DE<br>MELHOR<br>PARA<br><a class="mainopcoes bichinhos">BICHINHOS</a> <a
-                class="mainopcoes fazenda">FAZENDA</a> <a class="mainopcoes pesca">PESCA</a>
+            TUDO DE<br>MELHOR<br>PARA<br>
+
+            <?php if ($categorias_index): ?>
+                <?php foreach ($categorias_index as $categoria): ?>
+                    <?php
+                    // Define a classe de cor baseada no nome da categoria
+                    $colorClass = '';
+                    switch (strtolower($categoria['nome'])) {
+                        case 'pets':
+                            $colorClass = 'bichinhos';
+                            break;
+                        case 'fazenda':
+                            $colorClass = 'fazenda';
+                            break;
+                        case 'pesca':
+                            $colorClass = 'pesca';
+                            break;
+                    }
+                    ?>
+                    <?php if (!empty($colorClass)): ?>
+                        <a href="<?php echo BASEURL; ?>catalogo.php#<?php echo htmlspecialchars($categoria['nome']); ?>"
+                            class="mainopcoes <?php echo $colorClass; ?>" style="text-decoration: none;">
+                            <?php echo strtoupper(htmlspecialchars($categoria['nome'])); ?>
+                        </a>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
+
         </div>
     </div>
 </div>

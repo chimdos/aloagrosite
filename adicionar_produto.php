@@ -7,74 +7,7 @@ error_reporting(E_ALL);
 require_once 'config.php';
 require_once DBAPI;
 require_once 'auth.php';
-
-// --- FUNÇÃO PARA PROCESSAR E SALVAR A IMAGEM (VERSÃO MELHORADA) ---
-function processAndSaveImage($file, $targetWidth, $targetHeight)
-{
-    $uploadDir = 'arquivos/uploads/produtos/';
-
-    // VERIFICAÇÃO 1: A pasta de upload existe e tem permissão de escrita?
-    if (!is_dir($uploadDir) || !is_writable($uploadDir)) {
-        // Retorna um erro específico se a pasta não tiver permissão
-        return ['success' => false, 'message' => 'Erro: A pasta de uploads não existe ou não tem permissão de escrita.'];
-    }
-
-    $allowedTypes = ['image/jpeg', 'image/png'];
-    $maxSize = 5 * 1024 * 1024; // 5 MB
-
-    $tmpName = $file['tmp_name'];
-    $fileType = mime_content_type($tmpName);
-    $fileSize = $file['size'];
-
-    // Validações
-    if (!in_array($fileType, $allowedTypes))
-        return ['success' => false, 'message' => 'Tipo de arquivo inválido. Apenas JPG e PNG são permitidos.'];
-    if ($fileSize > $maxSize)
-        return ['success' => false, 'message' => 'O arquivo é muito grande. O tamanho máximo é 5MB.'];
-
-    // VERIFICAÇÃO 2: A biblioteca GD (para manipulação de imagem) está instalada?
-    if (!extension_loaded('gd')) {
-        return ['success' => false, 'message' => 'Erro de servidor: A extensão GD para manipulação de imagens não está habilitada.'];
-    }
-
-    list($originalWidth, $originalHeight) = getimagesize($tmpName);
-    $sourceImage = ($fileType == 'image/jpeg') ? imagecreatefromjpeg($tmpName) : imagecreatefrompng($tmpName);
-
-    if (!$sourceImage) {
-        return ['success' => false, 'message' => 'Não foi possível ler o arquivo de imagem. Pode estar corrompido.'];
-    }
-
-    $destImage = imagecreatetruecolor($targetWidth, $targetHeight);
-
-    $cropStartX = 0;
-    $cropStartY = 0;
-    $cropSize = min($originalWidth, $originalHeight);
-
-    if ($originalWidth > $originalHeight) { // Imagem horizontal
-        $cropStartX = (int) (($originalWidth - $originalHeight) / 2);
-    } elseif ($originalHeight > $originalWidth) { // Imagem vertical
-        $cropStartY = (int) (($originalHeight - $originalWidth) / 2);
-    }
-
-    imagecopyresampled($destImage, $sourceImage, 0, 0, $cropStartX, $cropStartY, $targetWidth, $targetHeight, $cropSize, $cropSize);
-
-    $extension = ($fileType == 'image/jpeg') ? 'jpg' : 'png';
-    $newFileName = uniqid('prod_', true) . '.' . $extension;
-    $savePath = $uploadDir . $newFileName;
-
-    // Tenta salvar a imagem
-    $saved = ($fileType == 'image/jpeg') ? imagejpeg($destImage, $savePath, 90) : imagepng($destImage, $savePath, 9);
-
-    imagedestroy($sourceImage);
-    imagedestroy($destImage);
-
-    if ($saved) {
-        return ['success' => true, 'filename' => $newFileName];
-    } else {
-        return ['success' => false, 'message' => 'Não foi possível salvar a imagem processada no servidor.'];
-    }
-}
-// --- FIM DA FUNÇÃO ---
+require_once 'functions.php';
 
 $auth = new Auth();
 
